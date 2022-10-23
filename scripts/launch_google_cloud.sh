@@ -34,7 +34,7 @@ TENSORBOARD=projects/237148598933/locations/europe-west4/tensorboards/5315267907
 cd fraud-detection-pipelines || exit
 
 VERSION=$(python setup.py --version)
-LOCAL_PACKAGE=dist/fraud-detection-pipeline-$VERSION.tar.gz
+LOCAL_PACKAGE=dist/fraud-detection-pipelines-$VERSION.tar.gz
 
 python setup.py sdist
 
