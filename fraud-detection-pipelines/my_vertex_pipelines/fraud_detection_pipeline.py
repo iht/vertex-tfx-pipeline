@@ -36,7 +36,8 @@ def create_pipeline(pipeline_name: str,
                     tensorboard: str,
                     service_account: str,
                     temp_location: str,
-                    local_connection_config: Optional[str]) -> tfx.dsl.Pipeline:
+                    local_connection_config: Optional[str],
+                    enable_cloud_tuner: bool = False) -> tfx.dsl.Pipeline:
     ## -----
     ## Input
     ## -----
@@ -96,23 +97,24 @@ def create_pipeline(pipeline_name: str,
                 'dataset_size': vertex_configs.DATASET_SIZE
             })
     else:  # If we are in Vertex, let's leverage Vertex Training and Vertex Hypertuner
-        tuner_trials_dir = os.path.join(pipeline_root, 'trials')
+        if enable_cloud_tuner:
+            tuner_trials_dir = os.path.join(pipeline_root, 'trials')
 
-        vertex_tuner_config = vertex_configs.get_vertex_tuner_config(project_id=project_id,
-                                                                     region=region,
-                                                                     service_account=service_account)
+            vertex_tuner_config = vertex_configs.get_vertex_tuner_config(project_id=project_id,
+                                                                         region=region,
+                                                                         service_account=service_account)
 
-        tuner = tfx.extensions.google_cloud_ai_platform.Tuner(
-            examples=transform.outputs['transformed_examples'],
-            transform_graph=transform.outputs['transform_graph'],
-            module_file=trainer_fn_file,
-            tune_args=tfx.proto.TuneArgs(num_parallel_trials=5),
-            custom_config={
-                tfx.extensions.google_cloud_ai_platform.experimental.TUNING_ARGS_KEY: vertex_tuner_config,
-                tfx.extensions.google_cloud_ai_platform.experimental.REMOTE_TRIALS_WORKING_DIR_KEY: tuner_trials_dir,
-                'batch_size': vertex_configs.BATCH_SIZE,
-                'dataset_size': vertex_configs.DATASET_SIZE
-            })
+            tuner = tfx.extensions.google_cloud_ai_platform.Tuner(
+                examples=transform.outputs['transformed_examples'],
+                transform_graph=transform.outputs['transform_graph'],
+                module_file=trainer_fn_file,
+                tune_args=tfx.proto.TuneArgs(num_parallel_trials=5),
+                custom_config={
+                    tfx.extensions.google_cloud_ai_platform.experimental.TUNING_ARGS_KEY: vertex_tuner_config,
+                    tfx.extensions.google_cloud_ai_platform.experimental.REMOTE_TRIALS_WORKING_DIR_KEY: tuner_trials_dir,
+                    'batch_size': vertex_configs.BATCH_SIZE,
+                    'dataset_size': vertex_configs.DATASET_SIZE
+                })
 
         vertex_job_spec = vertex_configs.get_vertex_training_config(project_id=project_id,
                                                                     tensorboard=tensorboard,
@@ -123,7 +125,7 @@ def create_pipeline(pipeline_name: str,
             module_file=trainer_fn_file,
             examples=transform.outputs['transformed_examples'],
             transform_graph=transform.outputs['transform_graph'],
-            hyperparameters=tuner.outputs['best_hyperparameters'],
+            hyperparameters=tuner.outputs['best_hyperparameters'] if tuner else None,
             custom_config={
                 tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
                     True,
