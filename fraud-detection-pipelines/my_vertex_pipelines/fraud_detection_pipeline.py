@@ -98,7 +98,9 @@ def create_pipeline(pipeline_name: str,
     else:  # If we are in Vertex, let's leverage Vertex Training and Vertex Hypertuner
         tuner_trials_dir = os.path.join(pipeline_root, 'trials')
 
-        vertex_tuner_config = vertex_configs.get_vertex_tuner_config(project_id=project_id, region=region)
+        vertex_tuner_config = vertex_configs.get_vertex_tuner_config(project_id=project_id,
+                                                                     region=region,
+                                                                     service_account=service_account)
 
         tuner = tfx.extensions.google_cloud_ai_platform.Tuner(
             examples=transform.outputs['transformed_examples'],

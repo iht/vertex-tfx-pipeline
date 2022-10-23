@@ -47,8 +47,10 @@ def get_beam_args_for_local(project: str, temp_location_gcs: str, region: str) -
     return beam_args
 
 
-def get_vertex_tuner_config(project_id: str, region: str) -> Dict[str, str]:
-    vertex_tuner_config = {'project': project_id, 'region': region}
+def get_vertex_tuner_config(project_id: str, region: str, service_account: str) -> Dict[str, str]:
+    vertex_tuner_config = {'project': project_id,
+                           'region': region,
+                           'service_account': service_account}
     return vertex_tuner_config
 
 
