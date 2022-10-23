@@ -11,12 +11,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Dict
 
 import tensorflow_transform as tft
 import tensorflow as tf
 
 
-def preprocessing_fn(inputs: dict[str, tf.Tensor]) -> dict[str, tf.Tensor]:
+def preprocessing_fn(inputs: Dict[str, tf.Tensor]) -> Dict[str, tf.Tensor]:
     # Let's normalize all the columns that start with V
     output_dict = {
         'Amount': tft.scale_to_0_1(inputs['Amount']),

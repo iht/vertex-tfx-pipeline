@@ -23,9 +23,12 @@ def run_in_vertex(project_id: str,
                   pipeline_name: str,
                   service_account: str,
                   tensorboard_instance: str):
+    experiment_name = "fraud-detection-pipeline"
+
     aiplatform.init(project=project_id,
                     location=region,
-                    experiment_tensorboard=tensorboard_instance)
+                    experiment_tensorboard=tensorboard_instance,
+                    experiment="fraud-detection-pipeline")
 
     job = aiplatform.PipelineJob(template_path=pipeline_definition,
                                  display_name=pipeline_name,

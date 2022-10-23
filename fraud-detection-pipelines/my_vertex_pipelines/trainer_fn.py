@@ -15,6 +15,7 @@
 import datetime
 import logging
 import os
+from typing import List
 
 import keras_tuner
 import tensorflow as tf
@@ -30,12 +31,12 @@ from tensorflow_metadata.proto.v0.schema_pb2 import Schema
 LABEL_KEY = "Class"
 
 
-def get_feature_keys(d: dict) -> list[str]:
+def get_feature_keys(d: dict) -> List[str]:
     keys_to_select = [k for k in d.keys() if k.startswith("V") or k.startswith("Amount")]
     return keys_to_select
 
 
-def read_using_tfx(file_pattern: list[str],
+def read_using_tfx(file_pattern: List[str],
                    data_accessor: tfx.components.DataAccessor,
                    schema: schema_pb2.Schema,
                    batch_size: int) -> tf.data.Dataset:
@@ -45,7 +46,7 @@ def read_using_tfx(file_pattern: list[str],
         schema=schema).repeat()
 
 
-def build_model(hparams: keras_tuner.HyperParameters, feature_keys: list[str]) -> tf.keras.Model:
+def build_model(hparams: keras_tuner.HyperParameters, feature_keys: List[str]) -> tf.keras.Model:
     inputs = [tf.keras.layers.Input(shape=(1,), name=f) for f in feature_keys]
     d = tf.keras.layers.concatenate(inputs)
     layer_size = hparams.get("num_neurons")

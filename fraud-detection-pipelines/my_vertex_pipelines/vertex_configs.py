@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from typing import Dict, List
 
 import tfx.v1 as tfx
 
@@ -37,7 +38,7 @@ def get_beam_args_for_dataflow(project: str,
     return beam_args
 
 
-def get_beam_args_for_local(project: str, temp_location_gcs: str, region: str) -> list[str]:
+def get_beam_args_for_local(project: str, temp_location_gcs: str, region: str) -> List[str]:
     beam_args = [f"--project={project}",
                  f"--temp_location={temp_location_gcs}",
                  f"--region={region}",
@@ -46,7 +47,7 @@ def get_beam_args_for_local(project: str, temp_location_gcs: str, region: str) -
     return beam_args
 
 
-def get_vertex_tuner_config(project_id: str, region: str) -> dict[str, str]:
+def get_vertex_tuner_config(project_id: str, region: str) -> Dict[str, str]:
     vertex_tuner_config = {'project': project_id, 'region': region}
     return vertex_tuner_config
 
@@ -55,7 +56,7 @@ def get_vertex_training_config(project_id: str,
                                region: str,
                                tensorboard: str,
                                service_account: str,
-                               tb_logs_basedir: str) -> dict[str, str]:
+                               tb_logs_basedir: str) -> Dict[str, str]:
     vertex_job_spec = {
         'project': project_id,
         'region': region,
@@ -73,7 +74,7 @@ def get_vertex_training_config(project_id: str,
     return vertex_job_spec
 
 
-def get_vertex_endpoint_config(project_id: str, region: str, endpoint_name: str) -> dict[str, str]:
+def get_vertex_endpoint_config(project_id: str, region: str, endpoint_name: str) -> Dict[str, str]:
     vertex_serving_spec = {
         'project_id': project_id,
         'region': region,

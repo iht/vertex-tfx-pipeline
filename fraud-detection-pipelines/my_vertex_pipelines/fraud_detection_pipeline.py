@@ -14,7 +14,7 @@
 
 import os
 
-from typing import Optional
+from typing import Optional, List
 
 import tfx.v1 as tfx
 from tfx.components import StatisticsGen, SchemaGen, Transform
@@ -30,7 +30,7 @@ def create_pipeline(pipeline_name: str,
                     query: str,
                     transform_fn_file: str,
                     trainer_fn_file: str,
-                    beam_pipeline_args: Optional[list[str]],
+                    beam_pipeline_args: Optional[List[str]],
                     region: str,
                     project_id: str,
                     tensorboard: str,
