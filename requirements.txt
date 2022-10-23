@@ -1,0 +1,4 @@
+tfx[kfp]==1.10.0
+tensorflow==2.9.0
+tensorflow_cloud
+google-cloud-aiplatform
