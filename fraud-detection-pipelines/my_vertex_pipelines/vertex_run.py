@@ -25,13 +25,12 @@ def run_in_vertex(project_id: str,
                   tensorboard_instance: str):
     aiplatform.init(project=project_id,
                     location=region,
-                    experiment_tensorboard=tensorboard_instance,
-                    experiment="fraud-detection-pipeline")
+                    experiment_tensorboard=tensorboard_instance)
 
     job = aiplatform.PipelineJob(template_path=pipeline_definition,
                                  display_name=pipeline_name,
                                  enable_caching=True)
-    job.submit(service_account=service_account)
+    job.submit(service_account=service_account, experiment="fraud-detection-pipeline")
 
 
 def run_locally(pipeline: tfx.dsl.Pipeline):

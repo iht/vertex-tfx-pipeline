@@ -22,7 +22,7 @@ from tfx.extensions.google_cloud_big_query.example_gen.component import BigQuery
 
 import tensorflow_model_analysis as tfma
 
-import vertex_configs
+from my_vertex_pipelines import vertex_configs
 
 
 def create_pipeline(pipeline_name: str,

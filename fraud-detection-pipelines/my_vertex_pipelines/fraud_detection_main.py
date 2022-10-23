@@ -18,9 +18,9 @@ import logging
 import tfx.v1 as tfx
 
 
-import fraud_detection_pipeline
-import vertex_configs
-import vertex_run
+from my_vertex_pipelines import fraud_detection_pipeline
+from my_vertex_pipelines import vertex_configs
+from my_vertex_pipelines import vertex_run
 
 
 def main(running_locally: bool,

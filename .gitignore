@@ -1,4 +1,5 @@
 .idea/
+fraud-detection-pipelines/fraud-detect-pipeline_pipeline.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
