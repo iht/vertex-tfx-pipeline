@@ -126,7 +126,7 @@ def run_fn(fn_args: tfx.components.FnArgs):
 
     model: tf.keras.Model = build_model(hparams=hparams, feature_keys=feature_keys)
     model.fit(
-        data=train_ds,
+        train_ds,
         steps_per_epoch=steps_per_epoch,
         validation_data=eval_ds,
         validation_steps=validation_steps,

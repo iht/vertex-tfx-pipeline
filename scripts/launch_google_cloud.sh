@@ -18,12 +18,12 @@ PROJECT=ihr-vertex-pipelines
 REGION=europe-west4
 QUERY="SELECT * FROM data_playground.transactions"
 
-PIPELINE_ROOT=gs://ihr-live-workshop/pipeline_local
+PIPELINE_ROOT=gs://ihr-live-workshop/pipeline
 PIPELINE_NAME=fraud-detect-pipeline
 TRANSFORM_FN=./my_vertex_pipelines/feature_engineering_fn.py
 TRAINER_FN=./my_vertex_pipelines/trainer_fn.py
 
-TEMP_LOCATION=gs://ihr-live-workshop/tmp/
+TEMP_LOCATION=gs://ihr-vertex-pipelines/tmp/
 
 SERVICE_ACCOUNT=ml-in-prod-vertex-sa@ihr-vertex-pipelines.iam.gserviceaccount.com
 SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@ihr-vertex-pipelines.iam.gserviceaccount.com
@@ -31,19 +31,16 @@ SUBNETWORK=regions/$REGION/subnetworks/default
 
 TENSORBOARD=projects/237148598933/locations/europe-west4/tensorboards/5315267907087761408
 
-# In Vertex, this variable contains the directory for logs outputs, let's emulate for local runs
-export AIP_TENSORBOARD_LOG_DIR=$PIPELINE_ROOT/tensorboard_logs/
-
 cd fraud-detection-pipelines || exit
 
 VERSION=$(python setup.py --version)
-LOCAL_PACKAGE=dist/fraud-detection-pipelines-$VERSION.tar.gz
+LOCAL_PACKAGE=dist/fraud-detection-pipeline-$VERSION.tar.gz
 
 python setup.py sdist
 
 pip install $LOCAL_PACKAGE
 
-python -m my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
+python -m  my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --region=$REGION \
   --query="$QUERY" \
   --pipeline-roo=$PIPELINE_ROOT \
@@ -54,5 +51,4 @@ python -m my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --service-account-dataflow=$SERVICE_ACCOUNT_DATAFLOW \
   --dataflow-network=$SUBNETWORK \
   --tensorboard=$TENSORBOARD \
-  --temp-location=$TEMP_LOCATION \
-  --run-locally
+  --temp-location=$TEMP_LOCATION
