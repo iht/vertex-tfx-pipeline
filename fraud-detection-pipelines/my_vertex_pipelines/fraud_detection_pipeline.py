@@ -115,7 +115,6 @@ def create_pipeline(pipeline_name: str,
             })
 
         vertex_job_spec = vertex_configs.get_vertex_training_config(project_id=project_id,
-                                                                    region=region,
                                                                     tensorboard=tensorboard,
                                                                     service_account=service_account,
                                                                     tb_logs_basedir=temp_location)
@@ -182,7 +181,6 @@ def create_pipeline(pipeline_name: str,
         serving_image = 'europe-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-9:latest'
         vertex_serving_spec = vertex_configs.get_vertex_endpoint_config(
             project_id,
-            region=region,
             endpoint_name="fraud-detection")
         pusher = tfx.extensions.google_cloud_ai_platform.Pusher(
             model=trainer.outputs['model'],

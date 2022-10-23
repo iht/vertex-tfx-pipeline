@@ -35,6 +35,9 @@ def get_beam_args_for_dataflow(project: str,
                  f"--no_use_public_ips",
                  f"--subnetwork={dataflow_network}"]
 
+    # FIXME
+    beam_args = get_beam_args_for_local(project, temp_location_gcs, region)
+
     return beam_args
 
 
@@ -55,13 +58,11 @@ def get_vertex_tuner_config(project_id: str, region: str, service_account: str) 
 
 
 def get_vertex_training_config(project_id: str,
-                               region: str,
                                tensorboard: str,
                                service_account: str,
                                tb_logs_basedir: str) -> Dict[str, str]:
     vertex_job_spec = {
         'project': project_id,
-        'region': region,
         'service_account': service_account,  # required for Tensorboard
         'tensorboard': tensorboard,
         'base_output_directory': {
@@ -76,10 +77,9 @@ def get_vertex_training_config(project_id: str,
     return vertex_job_spec
 
 
-def get_vertex_endpoint_config(project_id: str, region: str, endpoint_name: str) -> Dict[str, str]:
+def get_vertex_endpoint_config(project_id: str, endpoint_name: str) -> Dict[str, str]:
     vertex_serving_spec = {
         'project_id': project_id,
-        'region': region,
         'endpoint_name': endpoint_name,
         # Remaining argument is passed to aiplatform.Model.deploy()
         # See https://cloud.google.com/vertex-ai/docs/predictions/deploy-model-api#deploy_the_model

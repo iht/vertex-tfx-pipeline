@@ -21,7 +21,7 @@ import keras_tuner
 import tensorflow as tf
 import tensorflow_transform as tft
 import tfx.v1 as tfx
-from tensorflow_cloud.tuner.tuner import DistributingCloudTuner
+from tensorflow_cloud.tuner.tuner import CloudTuner
 from tensorflow_transform import TFTransformOutput
 from tfx_bsl.public import tfxio
 
@@ -169,7 +169,7 @@ def tuner_fn(fn_args: tfx.components.FnArgs) -> tfx.components.TunerFnResult:
     def hypermodel(hparams: keras_tuner.HyperParameters):
         return build_model(hparams=hparams, feature_keys=feature_keys)
 
-    tuner: DistributingCloudTuner = DistributingCloudTuner(
+    tuner: CloudTuner = CloudTuner(
         hypermodel=hypermodel,
         project_id=project_id,
         region=region,
