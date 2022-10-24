@@ -110,7 +110,7 @@ if __name__ == '__main__':
     region = args.region
 
     main(running_locally=args.run_locally,
-         enable_cloud_tuner=args.enable_cloud_tuner
+         enable_cloud_tuner=args.enable_cloud_tuner,
          pipeline_name=args.pipeline_name,
          pipeline_root=args.pipeline_root,
          query=args.query,
