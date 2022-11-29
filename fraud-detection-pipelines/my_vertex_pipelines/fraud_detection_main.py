@@ -17,14 +17,13 @@ import logging
 
 import tfx.v1 as tfx
 
-
 from my_vertex_pipelines import fraud_detection_pipeline
 from my_vertex_pipelines import vertex_configs
 from my_vertex_pipelines import vertex_run
 
 
 def main(running_locally: bool,
-         enabled_cloud_tuner: bool,
+         enable_cloud_tuner: bool,
          pipeline_name: str,
          pipeline_root: str,
          query: str,
@@ -68,7 +67,7 @@ def main(running_locally: bool,
         service_account=service_account_dataflow,
         temp_location=temp_location,
         local_connection_config=metadata_connection,
-        enabled_cloud_tuner=enabled_cloud_tuner)
+        enable_cloud_tuner=enable_cloud_tuner)
 
     runner.run(pipeline)  # Creates pipeline definition
 

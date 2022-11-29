@@ -215,13 +215,29 @@ def create_pipeline(pipeline_name: str,
                                     metadata_connection_config=local_connection_config,
                                     enable_cache=True)
 
+    elif enable_cloud_tuner:
+        components = [example_gen,
+                      statistics_gen,
+                      schema_gen,
+                      example_validator,
+                      transform,
+                      tuner,  # Add tuner
+                      trainer,
+                      pusher,
+                      model_resolver,
+                      evaluator]
+
+        pipeline = tfx.dsl.Pipeline(pipeline_name=pipeline_name,
+                                    pipeline_root=pipeline_root,
+                                    components=components,
+                                    beam_pipeline_args=beam_pipeline_args,
+                                    enable_cache=True)
     else:
         components = [example_gen,
                       statistics_gen,
                       schema_gen,
                       example_validator,
                       transform,
-                      tuner,  # Add tuner if running in the cloud
                       trainer,
                       pusher,
                       model_resolver,
