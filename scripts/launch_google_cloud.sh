@@ -29,7 +29,7 @@ SERVICE_ACCOUNT=ml-in-prod-vertex-sa@ihr-vertex-pipelines.iam.gserviceaccount.co
 SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@ihr-vertex-pipelines.iam.gserviceaccount.com
 SUBNETWORK=regions/$REGION/subnetworks/default
 
-TENSORBOARD=projects/237148598933/locations/europe-west4/tensorboards/6642070578557616128
+TENSORBOARD=projects/237148598933/locations/europe-west4/tensorboards/8957905949444538368
 
 cd fraud-detection-pipelines || exit
 
