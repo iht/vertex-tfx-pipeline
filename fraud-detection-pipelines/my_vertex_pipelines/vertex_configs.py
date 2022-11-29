@@ -35,9 +35,6 @@ def get_beam_args_for_dataflow(project: str,
                  f"--no_use_public_ips",
                  f"--subnetwork={dataflow_network}"]
 
-    # FIXME
-    beam_args = get_beam_args_for_local(project, temp_location_gcs, region)
-
     return beam_args
 
 
