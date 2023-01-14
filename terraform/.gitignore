@@ -37,3 +37,4 @@ terraform.rc
 *.lock.hcl
 
 backend.tf
+*bak
