@@ -60,7 +60,7 @@ def get_vertex_training_config(project_id: str,
     vertex_job_spec = {
         'project': project_id,
         'service_account': service_account,  # required for Tensorboard
-        'worker_pool_specs': [{'machine_spec': {'machine_type': 'n1-standard-4'},
+        'worker_pool_specs': [{'machine_spec': {'machine_type': 'e2-standard-4'},
                                'replica_count': 1,
                                'container_spec': {'image_uri': 'gcr.io/tfx-oss-public/tfx:{}'.format(tfx.__version__)}
                                }]
@@ -80,7 +80,7 @@ def get_vertex_endpoint_config(project_id: str, endpoint_name: str) -> Dict[str,
         # Machine type is the compute resource to serve prediction requests.
         # See https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types
         # for available machine types and acccerators.
-        'machine_type': 'n1-standard-4',
+        'machine_type': 'e2-standard-4',
     }
 
     return vertex_serving_spec
