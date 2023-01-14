@@ -23,6 +23,7 @@ from my_vertex_pipelines import vertex_run
 
 
 def main(running_locally: bool,
+         use_dataflow: bool,
          pipeline_name: str,
          pipeline_root: str,
          query: str,
@@ -46,11 +47,16 @@ def main(running_locally: bool,
                                                            temp_location_gcs=temp_location)
     else:
         metadata_connection = None
-        beam_args = vertex_configs.get_beam_args_for_dataflow(project=project_id,
-                                                              region=region,
-                                                              temp_location_gcs=temp_location,
-                                                              service_account_dataflow=service_account_dataflow,
-                                                              dataflow_network=dataflow_network)
+        if use_dataflow:
+            beam_args = vertex_configs.get_beam_args_for_dataflow(project=project_id,
+                                                                  region=region,
+                                                                  temp_location_gcs=temp_location,
+                                                                  service_account_dataflow=service_account_dataflow,
+                                                                  dataflow_network=dataflow_network)
+        else:
+            beam_args = vertex_configs.get_beam_args_for_local(project=project_id,
+                                                               region=region,
+                                                               temp_location_gcs=temp_location)
 
     pipeline: tfx.dsl.Pipeline = fraud_detection_pipeline.create_pipeline(
         pipeline_name=pipeline_name,
@@ -86,30 +92,35 @@ if __name__ == '__main__':
     parser.add_argument("--project-id", required=True)
     parser.add_argument("--region", required=True)
     parser.add_argument("--temp-location", required=True)
-    parser.add_argument("--service-account", required=True)
-    parser.add_argument("--service-account-dataflow", required=True)
-    parser.add_argument("--dataflow-network", required=True)
+
+    parser.add_argument("--service-account", required=False, help="Mandatory if running in Vertex")
+
+    parser.add_argument("--use-dataflow", required=False, action="store_true", default=True)
+    parser.add_argument("--service-account-dataflow", required=False,
+                        help="Mandatory if running in Vertex with Dataflow enabled")
+    parser.add_argument("--dataflow-network", required=False,
+                        help="Mandatory if running in Vertex with Dataflow enabled")
+
     parser.add_argument("--pipeline-root", required=True)
     parser.add_argument("--pipeline-name", required=True)
+
     parser.add_argument("--query", required=True)
+
     parser.add_argument("--transform-fn-path", required=True)
     parser.add_argument("--trainer-fn-path", required=True)
 
     args = parser.parse_args()
 
-    project_arg = args.project_id
-    temp_location_gcs_arg = args.temp_location
-    region_arg = args.region
-
     main(running_locally=args.run_locally,
+         use_dataflow=args.use_dataflow,
          pipeline_name=args.pipeline_name,
          pipeline_root=args.pipeline_root,
          query=args.query,
-         project_id=project_arg,
-         region=region_arg,
+         project_id=args.project_id,
+         region=args.region,
          service_account=args.service_account,
          service_account_dataflow=args.service_account_dataflow,
          dataflow_network=args.dataflow_network,
          transform_fn_file=args.transform_fn_path,
          trainer_fn_file=args.trainer_fn_path,
-         temp_location=temp_location_gcs_arg)
+         temp_location=args.temp_location)

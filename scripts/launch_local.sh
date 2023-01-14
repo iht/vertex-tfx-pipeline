@@ -25,10 +25,6 @@ TRAINER_FN=./my_vertex_pipelines/trainer_fn.py
 
 TEMP_LOCATION=gs://$PROJECT/tmp/
 
-SERVICE_ACCOUNT=ml-in-prod-vertex-sa@$PROJECT.iam.gserviceaccount.com
-SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@$PROJECT.iam.gserviceaccount.com
-SUBNETWORK=regions/$REGION/subnetworks/default
-
 cd fraud-detection-pipelines || exit
 
 VERSION=$(python setup.py --version)
@@ -45,8 +41,5 @@ python -m my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --pipeline-name=$PIPELINE_NAME \
   --transform-fn-path=$TRANSFORM_FN \
   --trainer-fn-path=$TRAINER_FN \
-  --service-account=$SERVICE_ACCOUNT \
-  --service-account-dataflow=$SERVICE_ACCOUNT_DATAFLOW \
-  --dataflow-network=$SUBNETWORK \
   --temp-location=$TEMP_LOCATION \
   --run-locally
