@@ -17,15 +17,18 @@ to reuse an existing project, use values similar to these ones:
 
 ```hcl
 region          = "us-central1"
-organization    = "organizations/12345678980"
 billing_account = "1234-1234-1234-1234"
 project_id      = "my-vertex-project"
-create_project  = false
 ```
 
-## Create project
+Check the file `terraform.tfvars.sample` for an example. You can copy it to 
+`terraform.tfvars` and edit it for more convenience.
 
-Run
+## Prepare project
+
+This repository assumes that there is a BigQuery table with certain data, a 
+couple of service accounts, a network with Google Private Access, etc. To 
+setup an existing Google Cloud project to be ready for this pipeline, run
 
 ```shell
 terraform init
