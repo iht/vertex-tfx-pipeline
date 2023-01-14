@@ -1,5 +1,3 @@
 region          = "us-central1"
-organization    = "organizations/1234567890"
 billing_account = "1234AB-1234AB-1234AB"
 project_id      = "my-project"
-create_project  = false

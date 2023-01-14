@@ -3,7 +3,6 @@ module "vx_pl_proj" {
   source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v19.0.0"
   billing_account = var.billing_account
   name            = var.project_id
-  parent          = var.organization
   project_create  = var.create_project
   services        = [
     "bigquery.googleapis.com",
@@ -79,12 +78,12 @@ module "dataflow_sa" {
 module "vx_pl_vpc" {
   source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc?ref=v19.0.0"
   project_id = module.vx_pl_proj.project_id
-  name       = "default"
+  name       = "vertexnet"
 
   subnets = [
     {
       ip_cidr_range         = "10.1.0.0/24"
-      name                  = "default"
+      name                  = "vertex"
       region                = var.region
       enable_private_access = true
     }
@@ -97,7 +96,7 @@ module "vx_pl_firewall" {
   project_id           = module.vx_pl_proj.project_id
   network              = module.vx_pl_vpc.name
   default_rules_config = {
-    admin_ranges = [module.vx_pl_vpc.subnet_ips["${var.region}/default"]]
+    admin_ranges = [module.vx_pl_vpc.subnet_ips["${var.region}/vertex"]]
   }
 }
 

@@ -9,11 +9,6 @@ variable "create_project" {
   default     = false
 }
 
-variable "organization" {
-  description = "Organization for the project/resources"
-  type        = string
-}
-
 variable "project_id" {
   description = "Id for the project to be created"
   type        = string
