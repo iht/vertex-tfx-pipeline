@@ -119,10 +119,6 @@ def run_fn(fn_args: tfx.components.FnArgs):
     train_ds = read_using_tfx(train_files, data_accesor, schema, batch_size)
     eval_ds = read_using_tfx(eval_files, data_accesor, schema, batch_size)
 
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(
-        log_dir=os.environ['AIP_TENSORBOARD_LOG_DIR'],
-        histogram_freq=1)
-
     early_stop_cb = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
 
     model: tf.keras.Model = build_model(hparams=hparams, feature_keys=feature_keys)
@@ -131,7 +127,7 @@ def run_fn(fn_args: tfx.components.FnArgs):
         steps_per_epoch=steps_per_epoch,
         validation_data=eval_ds,
         validation_steps=validation_steps,
-        callbacks=[tensorboard_callback, early_stop_cb])
+        callbacks=[early_stop_cb])
 
     signatures = {
         'serving_default': _get_serve_tf_examples_fn(model, tf_transform_output)}
