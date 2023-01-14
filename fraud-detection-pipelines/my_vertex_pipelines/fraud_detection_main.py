@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--service-account", required=False, help="Mandatory if running in Vertex")
 
-    parser.add_argument("--use-dataflow", required=False, action="store_true", default=True)
+    parser.add_argument("--use-dataflow", required=False, action="store_true", default=False)
     parser.add_argument("--service-account-dataflow", required=False,
                         help="Mandatory if running in Vertex with Dataflow enabled")
     parser.add_argument("--dataflow-network", required=False,
