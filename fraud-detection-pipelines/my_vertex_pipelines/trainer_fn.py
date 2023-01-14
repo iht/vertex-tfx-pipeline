@@ -12,16 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import datetime
 import logging
-import os
 from typing import List
 
 import keras_tuner
 import tensorflow as tf
 import tensorflow_transform as tft
 import tfx.v1 as tfx
-from tensorflow_cloud.tuner.tuner import CloudTuner
 from tensorflow_transform import TFTransformOutput
 from tfx_bsl.public import tfxio
 
@@ -133,60 +130,3 @@ def run_fn(fn_args: tfx.components.FnArgs):
         'serving_default': _get_serve_tf_examples_fn(model, tf_transform_output)}
 
     model.save(fn_args.serving_model_dir, signatures=signatures)
-
-
-def tuner_fn(fn_args: tfx.components.FnArgs) -> tfx.components.TunerFnResult:
-    tuning_config = fn_args.custom_config[tfx.extensions.google_cloud_ai_platform.experimental.TUNING_ARGS_KEY]
-    project_id = tuning_config['project']
-    region = tuning_config['region']
-
-    tf_transform_output: TFTransformOutput = tft.TFTransformOutput(fn_args.transform_graph_path)
-    feature_keys = get_feature_keys(tf_transform_output.transformed_feature_spec())
-
-    data_accesor = fn_args.data_accessor
-    schema: Schema = tf_transform_output.transformed_metadata.schema
-
-    train_files = fn_args.train_files
-    eval_files = fn_args.eval_files
-    batch_size = fn_args.custom_config['batch_size']
-    dataset_size = fn_args.custom_config['dataset_size']
-
-    steps_per_epoch = (dataset_size * 2 / 3) // batch_size
-    validation_steps = (dataset_size * 1 / 3) // batch_size
-
-    train_ds = read_using_tfx(train_files, data_accesor, schema, batch_size)
-    eval_ds = read_using_tfx(eval_files, data_accesor, schema, batch_size)
-
-    hparams = _get_hyperparameters()
-
-    study_id = 'DistributingCloudTuner_study_{}'.format(
-        datetime.datetime.now().strftime('%Y%m%d%H'))
-
-    def hypermodel(hparams: keras_tuner.HyperParameters):
-        return build_model(hparams=hparams, feature_keys=feature_keys)
-
-    tuner: CloudTuner = CloudTuner(
-        hypermodel=hypermodel,
-        project_id=project_id,
-        region=region,
-        hyperparameters=hparams,
-        objective=keras_tuner.Objective('val_binary_accuracy', 'max'),
-        directory=os.path.join(tuning_config['remote_trials_working_dir'], study_id),
-        study_id=study_id,
-        max_trials=50,
-        replica_count=5)
-
-    early_stop_cb = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
-
-    result = tfx.components.TunerFnResult(
-        tuner=tuner,
-        fit_kwargs={
-            'data': train_ds,
-            'steps_per_epoch': steps_per_epoch,
-            'validation_data': eval_ds,
-            'validation_steps': validation_steps,
-            'callbacks': [early_stop_cb]
-        }
-    )
-
-    return result
