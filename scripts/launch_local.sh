@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,25 +14,20 @@
 # limitations under the License.
 #
 
-PROJECT=ihr-vertex-pipelines
-REGION=europe-west4
+PROJECT=<YOUR PROJECT ID>
+REGION=us-central1
 QUERY="SELECT * FROM data_playground.transactions"
 
-PIPELINE_ROOT=gs://ihr-live-workshop/pipeline_local
+PIPELINE_ROOT=gs://$PROJECT/pipeline_local
 PIPELINE_NAME=fraud-detect-pipeline
 TRANSFORM_FN=./my_vertex_pipelines/feature_engineering_fn.py
 TRAINER_FN=./my_vertex_pipelines/trainer_fn.py
 
-TEMP_LOCATION=gs://ihr-live-workshop/tmp/
+TEMP_LOCATION=gs://$PROJECT/tmp/
 
-SERVICE_ACCOUNT=ml-in-prod-vertex-sa@ihr-vertex-pipelines.iam.gserviceaccount.com
-SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@ihr-vertex-pipelines.iam.gserviceaccount.com
+SERVICE_ACCOUNT=ml-in-prod-vertex-sa@$PROJECT.iam.gserviceaccount.com
+SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@$PROJECT.iam.gserviceaccount.com
 SUBNETWORK=regions/$REGION/subnetworks/default
-
-TENSORBOARD=projects/237148598933/locations/europe-west4/tensorboards/8957905949444538368
-
-# In Vertex, this variable contains the directory for logs outputs, let's emulate for local runs
-export AIP_TENSORBOARD_LOG_DIR=$PIPELINE_ROOT/tensorboard_logs/
 
 cd fraud-detection-pipelines || exit
 
@@ -53,6 +48,5 @@ python -m my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --service-account=$SERVICE_ACCOUNT \
   --service-account-dataflow=$SERVICE_ACCOUNT_DATAFLOW \
   --dataflow-network=$SUBNETWORK \
-  --tensorboard=$TENSORBOARD \
   --temp-location=$TEMP_LOCATION \
   --run-locally

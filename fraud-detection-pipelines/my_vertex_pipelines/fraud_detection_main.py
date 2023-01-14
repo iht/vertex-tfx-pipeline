@@ -1,4 +1,4 @@
-#  Copyright 2022 Google LLC
+#  Copyright 2023 Google LLC
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ def main(running_locally: bool,
          dataflow_network: str,
          transform_fn_file: str,
          trainer_fn_file: str,
-         tensorboard: str,
          temp_location: str):
     pipeline_definition = pipeline_name + "_pipeline.json"
     runner = tfx.orchestration.experimental.KubeflowV2DagRunner(
@@ -63,7 +62,6 @@ def main(running_locally: bool,
         region=region,
         trainer_fn_file=trainer_fn_file,
         project_id=project_id,
-        tensorboard=tensorboard,
         service_account=service_account_dataflow,
         temp_location=temp_location,
         local_connection_config=metadata_connection,
@@ -80,8 +78,7 @@ def main(running_locally: bool,
                                  region=region,
                                  pipeline_definition=pipeline_definition,
                                  pipeline_name=pipeline_name,
-                                 service_account=service_account,
-                                 tensorboard_instance=tensorboard)
+                                 service_account=service_account)
 
 
 if __name__ == '__main__':
@@ -100,25 +97,23 @@ if __name__ == '__main__':
     parser.add_argument("--query", required=True)
     parser.add_argument("--transform-fn-path", required=True)
     parser.add_argument("--trainer-fn-path", required=True)
-    parser.add_argument("--tensorboard", required=True)
 
     args = parser.parse_args()
 
-    project = args.project_id
-    temp_location_gcs = args.temp_location
-    region = args.region
+    project_arg = args.project_id
+    temp_location_gcs_arg = args.temp_location
+    region_arg = args.region
 
     main(running_locally=args.run_locally,
          enable_cloud_tuner=args.enable_cloud_tuner,
          pipeline_name=args.pipeline_name,
          pipeline_root=args.pipeline_root,
          query=args.query,
-         project_id=project,
-         region=region,
+         project_id=project_arg,
+         region=region_arg,
          service_account=args.service_account,
          service_account_dataflow=args.service_account_dataflow,
          dataflow_network=args.dataflow_network,
          transform_fn_file=args.transform_fn_path,
          trainer_fn_file=args.trainer_fn_path,
-         tensorboard=args.tensorboard,
-         temp_location=temp_location_gcs)
+         temp_location=temp_location_gcs_arg)

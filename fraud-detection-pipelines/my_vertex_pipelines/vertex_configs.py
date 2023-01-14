@@ -1,4 +1,4 @@
-#  Copyright 2022 Google LLC
+#  Copyright 2023 Google LLC
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -55,16 +55,11 @@ def get_vertex_tuner_config(project_id: str, region: str, service_account: str) 
 
 
 def get_vertex_training_config(project_id: str,
-                               tensorboard: str,
                                service_account: str,
                                tb_logs_basedir: str) -> Dict[str, str]:
     vertex_job_spec = {
         'project': project_id,
         'service_account': service_account,  # required for Tensorboard
-        'tensorboard': tensorboard,
-        'base_output_directory': {
-            'output_uri_prefix': tb_logs_basedir,  # required for Tensorboard
-        },
         'worker_pool_specs': [{'machine_spec': {'machine_type': 'n1-standard-4'},
                                'replica_count': 1,
                                'container_spec': {'image_uri': 'gcr.io/tfx-oss-public/tfx:{}'.format(tfx.__version__)}

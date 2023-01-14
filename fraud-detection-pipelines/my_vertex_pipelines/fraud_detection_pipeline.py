@@ -1,4 +1,4 @@
-#  Copyright 2022 Google LLC
+#  Copyright 2023 Google LLC
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -11,8 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-import os
 
 from typing import Optional, List
 
@@ -33,11 +31,9 @@ def create_pipeline(pipeline_name: str,
                     beam_pipeline_args: Optional[List[str]],
                     region: str,
                     project_id: str,
-                    tensorboard: str,
                     service_account: str,
                     temp_location: str,
-                    local_connection_config: Optional[str],
-                    enable_cloud_tuner: bool = False) -> tfx.dsl.Pipeline:
+                    local_connection_config: Optional[str]) -> tfx.dsl.Pipeline:
     ## -----
     ## Input
     ## -----
@@ -86,7 +82,6 @@ def create_pipeline(pipeline_name: str,
     ## --------
     ## Training
     ## --------
-    tuner = None
     if local_connection_config:
         trainer = tfx.components.Trainer(
             module_file=trainer_fn_file,
@@ -96,28 +91,8 @@ def create_pipeline(pipeline_name: str,
                 'batch_size': vertex_configs.BATCH_SIZE,
                 'dataset_size': vertex_configs.DATASET_SIZE
             })
-    else:  # If we are in Vertex, let's leverage Vertex Training and Vertex Hypertuner
-        if enable_cloud_tuner:
-            tuner_trials_dir = os.path.join(pipeline_root, 'trials')
-
-            vertex_tuner_config = vertex_configs.get_vertex_tuner_config(project_id=project_id,
-                                                                         region=region,
-                                                                         service_account=service_account)
-
-            tuner = tfx.extensions.google_cloud_ai_platform.Tuner(
-                examples=transform.outputs['transformed_examples'],
-                transform_graph=transform.outputs['transform_graph'],
-                module_file=trainer_fn_file,
-                tune_args=tfx.proto.TuneArgs(num_parallel_trials=5),
-                custom_config={
-                    tfx.extensions.google_cloud_ai_platform.experimental.TUNING_ARGS_KEY: vertex_tuner_config,
-                    tfx.extensions.google_cloud_ai_platform.experimental.REMOTE_TRIALS_WORKING_DIR_KEY: tuner_trials_dir,
-                    'batch_size': vertex_configs.BATCH_SIZE,
-                    'dataset_size': vertex_configs.DATASET_SIZE
-                })
-
+    else:  # We are training in Vertex
         vertex_job_spec = vertex_configs.get_vertex_training_config(project_id=project_id,
-                                                                    tensorboard=tensorboard,
                                                                     service_account=service_account,
                                                                     tb_logs_basedir=temp_location)
 
@@ -125,7 +100,6 @@ def create_pipeline(pipeline_name: str,
             module_file=trainer_fn_file,
             examples=transform.outputs['transformed_examples'],
             transform_graph=transform.outputs['transform_graph'],
-            hyperparameters=tuner.outputs['best_hyperparameters'] if tuner else None,
             custom_config={
                 tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
                     True,
@@ -213,24 +187,6 @@ def create_pipeline(pipeline_name: str,
                                     components=components,
                                     beam_pipeline_args=beam_pipeline_args,
                                     metadata_connection_config=local_connection_config,
-                                    enable_cache=True)
-
-    elif enable_cloud_tuner:
-        components = [example_gen,
-                      statistics_gen,
-                      schema_gen,
-                      example_validator,
-                      transform,
-                      tuner,  # Add tuner
-                      trainer,
-                      pusher,
-                      model_resolver,
-                      evaluator]
-
-        pipeline = tfx.dsl.Pipeline(pipeline_name=pipeline_name,
-                                    pipeline_root=pipeline_root,
-                                    components=components,
-                                    beam_pipeline_args=beam_pipeline_args,
                                     enable_cache=True)
     else:
         components = [example_gen,
