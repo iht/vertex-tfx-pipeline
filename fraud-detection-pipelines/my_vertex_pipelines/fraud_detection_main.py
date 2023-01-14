@@ -15,6 +15,8 @@
 import argparse
 import logging
 
+from datetime import datetime
+
 import tfx.v1 as tfx
 
 from my_vertex_pipelines import fraud_detection_pipeline
@@ -58,8 +60,13 @@ def main(running_locally: bool,
                                                                region=region,
                                                                temp_location_gcs=temp_location)
 
+    # Use a custom job id to register params and metrics in the same experiment run id
+    this_moment: str = datetime.now().strftime("%Y%m%d%H%M%S")
+    job_id = f"{pipeline_name}-{this_moment}"
+
     pipeline: tfx.dsl.Pipeline = fraud_detection_pipeline.create_pipeline(
         pipeline_name=pipeline_name,
+        experiment_run_name=job_id,
         pipeline_root=pipeline_root,
         query=query,
         beam_pipeline_args=beam_args,

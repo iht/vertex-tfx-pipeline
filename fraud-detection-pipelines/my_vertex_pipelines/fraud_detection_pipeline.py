@@ -24,6 +24,7 @@ from my_vertex_pipelines import vertex_configs
 
 
 def create_pipeline(pipeline_name: str,
+                    experiment_run_name: str,
                     pipeline_root: str,
                     query: str,
                     transform_fn_file: str,
@@ -108,7 +109,11 @@ def create_pipeline(pipeline_name: str,
                 tfx.extensions.google_cloud_ai_platform.TRAINING_ARGS_KEY:
                     vertex_job_spec,
                 'batch_size': vertex_configs.BATCH_SIZE,
-                'dataset_size': vertex_configs.DATASET_SIZE
+                'dataset_size': vertex_configs.DATASET_SIZE,
+                'experiment_name': pipeline_name,
+                'experiment_run_name': experiment_run_name,
+                'project_id': project_id,
+                'location': region
             })
 
     ## ---------------------------------

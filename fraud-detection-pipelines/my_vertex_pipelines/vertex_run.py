@@ -22,17 +22,13 @@ def run_in_vertex(project_id: str,
                   pipeline_definition: str,
                   pipeline_name: str,
                   service_account: str):
-    experiment_name = "fraud-detection-pipeline"
-
-    aiplatform.init(project=project_id,
-                    location=region,
-                    experiment="fraud-detection-pipeline")
+    aiplatform.init(project=project_id, location=region)
 
     job = aiplatform.PipelineJob(template_path=pipeline_definition,
                                  display_name=pipeline_name,
                                  enable_caching=True)
 
-    job.submit(service_account=service_account, experiment="fraud-detection-pipeline")
+    job.submit(service_account=service_account, experiment=pipeline_name)
 
 
 def run_locally(pipeline: tfx.dsl.Pipeline):

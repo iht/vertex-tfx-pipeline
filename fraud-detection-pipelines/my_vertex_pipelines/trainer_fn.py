@@ -15,10 +15,12 @@
 import logging
 from typing import List
 
+import keras.metrics
 import keras_tuner
 import tensorflow as tf
 import tensorflow_transform as tft
 import tfx.v1 as tfx
+from google.cloud import aiplatform
 from tensorflow_transform import TFTransformOutput
 from tfx_bsl.public import tfxio
 
@@ -92,6 +94,19 @@ def _get_hyperparameters() -> keras_tuner.HyperParameters:
     return hp
 
 
+def _report_params_and_metrics(num_neurons: int,
+                               batch_size: int,
+                               accuracy: float,
+                               experiment_name: str,
+                               run_name: str,
+                               project_id: str,
+                               location: str):
+    aiplatform.init(experiment=experiment_name, project=project_id, location=location)
+    aiplatform.start_run(run=run_name, resume=True)
+    aiplatform.log_params({'num_neurons': num_neurons, 'batch_size': batch_size})
+    aiplatform.log_metrics({'accuracy': accuracy})
+
+
 def run_fn(fn_args: tfx.components.FnArgs):
     tf_transform_output: TFTransformOutput = tft.TFTransformOutput(fn_args.transform_graph_path)
     schema: Schema = tf_transform_output.transformed_metadata.schema
@@ -119,14 +134,30 @@ def run_fn(fn_args: tfx.components.FnArgs):
     early_stop_cb = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
 
     model: tf.keras.Model = build_model(hparams=hparams, feature_keys=feature_keys)
-    model.fit(
+
+    h = model.fit(
         train_ds,
         steps_per_epoch=steps_per_epoch,
         validation_data=eval_ds,
         validation_steps=validation_steps,
+        metrics=[keras.metrics.Accuracy],
         callbacks=[early_stop_cb])
 
     signatures = {
         'serving_default': _get_serve_tf_examples_fn(model, tf_transform_output)}
 
     model.save(fn_args.serving_model_dir, signatures=signatures)
+
+    # Report parameters and metrics
+    experiment_name = fn_args.custom_config['experiment_name']
+    run_name = fn_args.custom_config['experiment_run_name']
+    project_id = fn_args['project_id']
+    location = fn_args['location']
+    accuracy = h['val_accuracy'][-1]
+    _report_params_and_metrics(num_neurons=hparams.get("num_neurons"),
+                               batch_size=batch_size,
+                               accuracy=accuracy,
+                               experiment_name=experiment_name,
+                               experiment_run_name=run_name,
+                               project_id=project_id,
+                               location=location)
