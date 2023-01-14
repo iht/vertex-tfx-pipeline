@@ -15,20 +15,25 @@
 import tfx.v1 as tfx
 
 from google.cloud import aiplatform
+from google.cloud.aiplatform import Experiment
 
 
 def run_in_vertex(project_id: str,
                   region: str,
                   pipeline_definition: str,
                   pipeline_name: str,
+                  experiment_name: str,
+                  job_id: str,
                   service_account: str):
-    aiplatform.init(project=project_id, location=region)
+
+    aiplatform.init(project=project_id, location=region, experiment=experiment_name)
 
     job = aiplatform.PipelineJob(template_path=pipeline_definition,
                                  display_name=pipeline_name,
-                                 enable_caching=True)
+                                 enable_caching=True,
+                                 job_id=job_id)
 
-    job.submit(service_account=service_account, experiment=pipeline_name)
+    job.submit(service_account=service_account, experiment=experiment_name)
 
 
 def run_locally(pipeline: tfx.dsl.Pipeline):

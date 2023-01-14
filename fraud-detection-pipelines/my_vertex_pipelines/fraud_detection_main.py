@@ -63,9 +63,11 @@ def main(running_locally: bool,
     # Use a custom job id to register params and metrics in the same experiment run id
     this_moment: str = datetime.now().strftime("%Y%m%d%H%M%S")
     job_id = f"{pipeline_name}-{this_moment}"
+    experiment_name = f"{pipeline_name}-experiment"
 
     pipeline: tfx.dsl.Pipeline = fraud_detection_pipeline.create_pipeline(
         pipeline_name=pipeline_name,
+        experiment_name=experiment_name,
         experiment_run_name=job_id,
         pipeline_root=pipeline_root,
         query=query,
@@ -89,6 +91,8 @@ def main(running_locally: bool,
                                  region=region,
                                  pipeline_definition=pipeline_definition,
                                  pipeline_name=pipeline_name,
+                                 experiment_name=experiment_name,
+                                 job_id=job_id,
                                  service_account=service_account)
 
 

@@ -24,6 +24,7 @@ from my_vertex_pipelines import vertex_configs
 
 
 def create_pipeline(pipeline_name: str,
+                    experiment_name: str,
                     experiment_run_name: str,
                     pipeline_root: str,
                     query: str,
@@ -110,7 +111,7 @@ def create_pipeline(pipeline_name: str,
                     vertex_job_spec,
                 'batch_size': vertex_configs.BATCH_SIZE,
                 'dataset_size': vertex_configs.DATASET_SIZE,
-                'experiment_name': pipeline_name,
+                'experiment_name': experiment_name,
                 'experiment_run_name': experiment_run_name,
                 'project_id': project_id,
                 'location': region

@@ -19,7 +19,7 @@ REGION=us-central1
 QUERY="SELECT * FROM data_playground.transactions"
 
 PIPELINE_ROOT=gs://$PROJECT/pipeline
-PIPELINE_NAME=fraud-detection-pipeline
+PIPELINE_NAME=fraud-detect-pipeline
 TRANSFORM_FN=./my_vertex_pipelines/feature_engineering_fn.py
 TRAINER_FN=./my_vertex_pipelines/trainer_fn.py
 
