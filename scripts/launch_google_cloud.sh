@@ -27,7 +27,7 @@ TEMP_LOCATION=gs://$PROJECT/tmp/
 
 SERVICE_ACCOUNT=ml-in-prod-vertex-sa@$PROJECT.iam.gserviceaccount.com
 SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@$PROJECT.iam.gserviceaccount.com
-SUBNETWORK=regions/$REGION/subnetworks/default
+SUBNETWORK=regions/$REGION/subnetworks/vertex
 
 cd fraud-detection-pipelines || exit
 
