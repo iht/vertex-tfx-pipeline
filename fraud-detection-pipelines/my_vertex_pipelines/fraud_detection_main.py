@@ -23,7 +23,6 @@ from my_vertex_pipelines import vertex_run
 
 
 def main(running_locally: bool,
-         enable_cloud_tuner: bool,
          pipeline_name: str,
          pipeline_root: str,
          query: str,
@@ -64,8 +63,7 @@ def main(running_locally: bool,
         project_id=project_id,
         service_account=service_account_dataflow,
         temp_location=temp_location,
-        local_connection_config=metadata_connection,
-        enable_cloud_tuner=enable_cloud_tuner)
+        local_connection_config=metadata_connection)
 
     runner.run(pipeline)  # Creates pipeline definition
 
@@ -85,7 +83,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--run-locally", action="store_true", default=False)
-    parser.add_argument("--enable-cloud-tuner", action="store_true", default=False)
     parser.add_argument("--project-id", required=True)
     parser.add_argument("--region", required=True)
     parser.add_argument("--temp-location", required=True)
@@ -105,7 +102,6 @@ if __name__ == '__main__':
     region_arg = args.region
 
     main(running_locally=args.run_locally,
-         enable_cloud_tuner=args.enable_cloud_tuner,
          pipeline_name=args.pipeline_name,
          pipeline_root=args.pipeline_root,
          query=args.query,
