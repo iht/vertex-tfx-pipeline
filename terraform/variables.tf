@@ -6,7 +6,7 @@ variable "billing_account" {
 variable "create_project" {
   description = "Set to false if your project already exists"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "organization" {
