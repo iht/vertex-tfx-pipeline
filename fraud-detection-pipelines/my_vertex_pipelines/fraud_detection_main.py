@@ -76,8 +76,7 @@ def main(running_locally: bool,
         region=region,
         trainer_fn_file=trainer_fn_file,
         project_id=project_id,
-        service_account=service_account_dataflow,
-        temp_location=temp_location,
+        service_account=service_account,
         local_connection_config=metadata_connection)
 
     runner.run(pipeline)  # Creates pipeline definition

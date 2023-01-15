@@ -34,7 +34,6 @@ def create_pipeline(pipeline_name: str,
                     region: str,
                     project_id: str,
                     service_account: str,
-                    temp_location: str,
                     local_connection_config: Optional[str]) -> tfx.dsl.Pipeline:
     ## -----
     ## Input
@@ -95,8 +94,7 @@ def create_pipeline(pipeline_name: str,
             })
     else:  # We are training in Vertex
         vertex_job_spec = vertex_configs.get_vertex_training_config(project_id=project_id,
-                                                                    service_account=service_account,
-                                                                    tb_logs_basedir=temp_location)
+                                                                    service_account=service_account)
 
         trainer = tfx.extensions.google_cloud_ai_platform.Trainer(
             module_file=trainer_fn_file,
