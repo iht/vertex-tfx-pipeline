@@ -156,6 +156,6 @@ def run_fn(fn_args: tfx.components.FnArgs):
                                batch_size=batch_size,
                                accuracy=accuracy,
                                experiment_name=experiment_name,
-                               experiment_run_name=run_name,
+                               run_name=run_name,
                                project_id=project_id,
                                location=location)
