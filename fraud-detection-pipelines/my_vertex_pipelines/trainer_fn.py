@@ -15,7 +15,6 @@
 import logging
 from typing import List
 
-import keras.metrics
 import keras_tuner
 import tensorflow as tf
 import tensorflow_transform as tft
@@ -140,7 +139,6 @@ def run_fn(fn_args: tfx.components.FnArgs):
         steps_per_epoch=steps_per_epoch,
         validation_data=eval_ds,
         validation_steps=validation_steps,
-        metrics=[keras.metrics.Accuracy],
         callbacks=[early_stop_cb])
 
     signatures = {
@@ -153,7 +151,7 @@ def run_fn(fn_args: tfx.components.FnArgs):
     run_name = fn_args.custom_config['experiment_run_name']
     project_id = fn_args['project_id']
     location = fn_args['location']
-    accuracy = h['val_accuracy'][-1]
+    accuracy = h['val_binary_accuracy'][-1]
     _report_params_and_metrics(num_neurons=hparams.get("num_neurons"),
                                batch_size=batch_size,
                                accuracy=accuracy,
