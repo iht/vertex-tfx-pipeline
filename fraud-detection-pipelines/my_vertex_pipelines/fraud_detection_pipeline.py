@@ -15,7 +15,7 @@
 from typing import Optional, List
 
 import tfx.v1 as tfx
-from tfx.components import StatisticsGen, SchemaGen, Transform
+from tfx.components import StatisticsGen, SchemaGen, Transform, ExampleValidator, Trainer, Evaluator, Pusher
 from tfx.extensions.google_cloud_big_query.example_gen.component import BigQueryExampleGen
 
 import tensorflow_model_analysis as tfma
@@ -39,18 +39,16 @@ def create_pipeline(pipeline_name: str,
     ## Input
     ## -----
     # Get data from BigQuery
-    example_gen: BigQueryExampleGen = tfx.extensions.google_cloud_big_query.BigQueryExampleGen(query=query)
+    example_gen: BigQueryExampleGen = None  # TODO: read from BigQuery using the query
 
     ## ---------------
     ## Data validation
     ## ---------------
     # Computes statistics over data for visualization and example validation.
-    statistics_gen: StatisticsGen = StatisticsGen(
-        examples=example_gen.outputs['examples'])
+    statistics_gen: StatisticsGen = None  # TODO
 
     # Schema inferred from stats
-    schema_gen: SchemaGen = SchemaGen(
-        statistics=statistics_gen.outputs['statistics'])
+    schema_gen: SchemaGen = None  # TODO (use schema inference for simplicity, rather than writing the schema)
 
     # Q: What if we don't want to infer the schema but check if the data complies with a certain schema?
     # A: We can use the ImportSchemaGen component, from a schema specified in some location (e.g. GCS)
@@ -59,9 +57,7 @@ def create_pipeline(pipeline_name: str,
 
     # Performs anomaly detection based on statistics and data schema.
     # The output contains anomalies info (data drift, skew training-test)
-    example_validator = tfx.components.ExampleValidator(
-        statistics=statistics_gen.outputs['statistics'],
-        schema=schema_gen.outputs['schema'])
+    example_validator: ExampleValidator = None  # TODO
 
     # See https://www.tensorflow.org/tfx/data_validation/get_started
     # Q: What are the thresholds used to decide if an anomaly should stop the pipeline?
@@ -75,46 +71,38 @@ def create_pipeline(pipeline_name: str,
     ## -------------------
     ## Feature engineering
     ## -------------------
-    transform: Transform = Transform(
-        examples=example_gen.outputs['examples'],
-        schema=schema_gen.outputs['schema'],
-        module_file=transform_fn_file)  # see feature_engineering_fn.py
+    transform: Transform = None  # TODO. See feature_engineering_fn.py
 
     ## --------
     ## Training
     ## --------
     if local_connection_config:
-        trainer = tfx.components.Trainer(
-            module_file=trainer_fn_file,
-            examples=transform.outputs['transformed_examples'],
-            transform_graph=transform.outputs['transform_graph'],
-            custom_config={
-                'batch_size': vertex_configs.BATCH_SIZE,
-                'dataset_size': vertex_configs.DATASET_SIZE
-            })
+        custom_config = {
+            'batch_size': vertex_configs.BATCH_SIZE,
+            'dataset_size': vertex_configs.DATASET_SIZE
+        }
+
+        trainer: Trainer = None  # TODO: Use tfx.components.Trainer
     else:  # We are training in Vertex
         vertex_job_spec = vertex_configs.get_vertex_training_config(project_id=project_id,
                                                                     service_account=service_account)
 
-        trainer = tfx.extensions.google_cloud_ai_platform.Trainer(
-            module_file=trainer_fn_file,
-            examples=transform.outputs['transformed_examples'],
-            transform_graph=transform.outputs['transform_graph'],
-            custom_config={
-                tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
-                    True,
-                tfx.extensions.google_cloud_ai_platform.VERTEX_REGION_KEY:
-                    region,
-                tfx.extensions.google_cloud_ai_platform.TRAINING_ARGS_KEY:
-                    vertex_job_spec,
-                'batch_size': vertex_configs.BATCH_SIZE,
-                'dataset_size': vertex_configs.DATASET_SIZE,
-                'experiment_name': experiment_name,
-                'experiment_run_name': experiment_run_name,
-                'project_id': project_id,
-                'location': region
-            })
+        custom_config = {
+            tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
+                True,
+            tfx.extensions.google_cloud_ai_platform.VERTEX_REGION_KEY:
+                region,
+            tfx.extensions.google_cloud_ai_platform.TRAINING_ARGS_KEY:
+                vertex_job_spec,
+            'batch_size': vertex_configs.BATCH_SIZE,
+            'dataset_size': vertex_configs.DATASET_SIZE,
+            'experiment_name': experiment_name,
+            'experiment_run_name': experiment_run_name,
+            'project_id': project_id,
+            'location': region
+        }
 
+        trainer: Trainer = None  # TODO. Use tfx.extensions.google_cloud_ai_platform.Trainer
     ## ---------------------------------
     ## Evaluate model (against baseline)
     ## ---------------------------------
@@ -141,7 +129,7 @@ def create_pipeline(pipeline_name: str,
                         )]),
             })])
 
-    evaluator = tfx.components.Evaluator(
+    evaluator: Evaluator = tfx.components.Evaluator(
         examples=transform.outputs['transformed_examples'],
         model=trainer.outputs['model'],
         baseline_model=model_resolver.outputs['model'],
@@ -151,62 +139,46 @@ def create_pipeline(pipeline_name: str,
     ## Push to endpoint (and publish in model registry if this is the first time)
     ## --------------------------------------------------------------------------
     if local_connection_config:
-        pusher = tfx.components.Pusher(
-            model=trainer.outputs['model'],
-            model_blessing=evaluator.outputs['blessing'],
-            push_destination=tfx.proto.PushDestination(
-                filesystem=tfx.proto.PushDestination.Filesystem(
-                    base_directory=vertex_configs.SERVING_MODEL_DIR)))
+        push_destination = tfx.proto.PushDestination(
+            filesystem=tfx.proto.PushDestination.Filesystem(
+                base_directory=vertex_configs.SERVING_MODEL_DIR))
+
+        pusher: Pusher = None  # TODO. Use tfx.components.Pusher
     else:
         serving_image = 'europe-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-9:latest'
+
         vertex_serving_spec = vertex_configs.get_vertex_endpoint_config(
             project_id,
             endpoint_name="fraud-detection")
-        pusher = tfx.extensions.google_cloud_ai_platform.Pusher(
-            model=trainer.outputs['model'],
-            model_blessing=evaluator.outputs['blessing'],
-            custom_config={
-                tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
-                    True,
-                tfx.extensions.google_cloud_ai_platform.VERTEX_REGION_KEY:
-                    region,
-                tfx.extensions.google_cloud_ai_platform.VERTEX_CONTAINER_IMAGE_URI_KEY:
-                    serving_image,
-                tfx.extensions.google_cloud_ai_platform.SERVING_ARGS_KEY:
-                    vertex_serving_spec,
-            })
 
-    if local_connection_config:
-        components = [example_gen,
-                      statistics_gen,
-                      schema_gen,
-                      example_validator,
-                      transform,
-                      trainer,
-                      pusher,
-                      model_resolver,
-                      evaluator]
-        pipeline = tfx.dsl.Pipeline(pipeline_name=pipeline_name,
-                                    pipeline_root=pipeline_root,
-                                    components=components,
-                                    beam_pipeline_args=beam_pipeline_args,
-                                    metadata_connection_config=local_connection_config,
-                                    enable_cache=True)
-    else:
-        components = [example_gen,
-                      statistics_gen,
-                      schema_gen,
-                      example_validator,
-                      transform,
-                      trainer,
-                      pusher,
-                      model_resolver,
-                      evaluator]
+        custom_config = {
+            tfx.extensions.google_cloud_ai_platform.ENABLE_VERTEX_KEY:
+                True,
+            tfx.extensions.google_cloud_ai_platform.VERTEX_REGION_KEY:
+                region,
+            tfx.extensions.google_cloud_ai_platform.VERTEX_CONTAINER_IMAGE_URI_KEY:
+                serving_image,
+            tfx.extensions.google_cloud_ai_platform.SERVING_ARGS_KEY:
+                vertex_serving_spec,
+        }
 
-        pipeline = tfx.dsl.Pipeline(pipeline_name=pipeline_name,
-                                    pipeline_root=pipeline_root,
-                                    components=components,
-                                    beam_pipeline_args=beam_pipeline_args,
-                                    enable_cache=True)
+        pusher: Pusher = None  # TODO. Use tfx.extensions.google_cloud_ai_platform.Pusher
+
+    components = [example_gen,
+                  statistics_gen,
+                  schema_gen,
+                  example_validator,
+                  transform,
+                  trainer,
+                  pusher,
+                  model_resolver,
+                  evaluator]
+
+    pipeline = tfx.dsl.Pipeline(pipeline_name=pipeline_name,
+                                pipeline_root=pipeline_root,
+                                components=components,
+                                beam_pipeline_args=beam_pipeline_args,
+                                metadata_connection_config=local_connection_config,
+                                enable_cache=True)
 
     return pipeline
