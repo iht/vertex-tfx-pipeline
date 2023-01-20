@@ -17,7 +17,6 @@ to reuse an existing project, use values similar to these ones:
 
 ```hcl
 region          = "us-central1"
-billing_account = "1234-1234-1234-1234"
 project_id      = "my-vertex-project"
 ```
 

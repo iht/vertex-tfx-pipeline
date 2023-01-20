@@ -1,6 +1,7 @@
 variable "billing_account" {
   description = "Billing account for the projects/resources"
   type        = string
+  default = null
 }
 
 variable "create_project" {
