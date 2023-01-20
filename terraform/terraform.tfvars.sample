@@ -1,3 +1,2 @@
 region          = "us-central1"
-billing_account = "1234AB-1234AB-1234AB"
 project_id      = "my-project"
