@@ -2,6 +2,7 @@
 module "vx_pl_proj" {
   source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v19.0.0"
   billing_account = var.billing_account
+  parent          = var.organization_or_folder
   name            = var.project_id
   project_create  = var.create_project
   services        = [
