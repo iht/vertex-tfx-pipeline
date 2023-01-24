@@ -109,3 +109,29 @@ module "vx_pl_nat" {
   name           = "default"
   router_network = module.vx_pl_vpc.self_link
 }
+
+resource "google_storage_bucket_object" "data_file" {
+  bucket = module.vx_pl_bucket.name
+  name   = "data/creditcard.csv.gz"
+  source = "../data/creditcard.csv.gz"
+}
+
+resource "google_bigquery_job" "csv_load_job" {
+  depends_on = [google_storage_bucket_object.data_file]
+  job_id     = "load_csv_data"
+  project    = module.vx_pl_proj.project_id
+  location   = var.region
+  load {
+    source_uris = [
+      "gs://${google_storage_bucket_object.data_file.bucket}/${google_storage_bucket_object.data_file.output_name}"
+    ]
+    destination_table {
+      project_id = module.vx_pl_proj.project_id
+      dataset_id = module.bigquery-dataset.dataset_id
+      table_id   = "transactions"
+    }
+    autodetect        = true
+    source_format     = "CSV"
+    write_disposition = "WRITE_TRUNCATE"
+  }
+}
