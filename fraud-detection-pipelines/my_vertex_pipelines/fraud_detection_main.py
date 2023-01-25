@@ -14,6 +14,7 @@
 
 import argparse
 import logging
+import os.path
 
 from datetime import datetime
 
@@ -37,7 +38,7 @@ def main(running_locally: bool,
          transform_fn_file: str,
          trainer_fn_file: str,
          temp_location: str):
-    pipeline_definition = pipeline_name + "_pipeline.json"
+    pipeline_definition = os.path.join("/tmp", pipeline_name + "_pipeline.json")
     runner = tfx.orchestration.experimental.KubeflowV2DagRunner(
         config=tfx.orchestration.experimental.KubeflowV2DagRunnerConfig(),
         output_filename=pipeline_definition)

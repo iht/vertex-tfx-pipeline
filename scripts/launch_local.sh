@@ -27,13 +27,6 @@ TEMP_LOCATION=gs://$PROJECT/tmp/
 
 cd fraud-detection-pipelines || exit
 
-VERSION=$(python setup.py --version)
-LOCAL_PACKAGE=dist/fraud-detection-pipelines-$VERSION.tar.gz
-
-python setup.py sdist
-
-pip install $LOCAL_PACKAGE
-
 python -m my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --region=$REGION \
   --query="$QUERY" \

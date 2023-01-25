@@ -31,13 +31,6 @@ SUBNETWORK=regions/$REGION/subnetworks/vertex
 
 cd fraud-detection-pipelines || exit
 
-VERSION=$(python setup.py --version)
-LOCAL_PACKAGE=dist/fraud-detection-pipelines-$VERSION.tar.gz
-
-python setup.py sdist
-
-pip install $LOCAL_PACKAGE
-
 python -m  my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --region=$REGION \
   --query="$QUERY" \
@@ -45,6 +38,7 @@ python -m  my_vertex_pipelines.fraud_detection_main --project-id=$PROJECT \
   --pipeline-name=$PIPELINE_NAME \
   --transform-fn-path=$TRANSFORM_FN \
   --trainer-fn-path=$TRAINER_FN \
+  --use-dataflow \
   --service-account=$SERVICE_ACCOUNT \
   --service-account-dataflow=$SERVICE_ACCOUNT_DATAFLOW \
   --dataflow-network=$SUBNETWORK \
