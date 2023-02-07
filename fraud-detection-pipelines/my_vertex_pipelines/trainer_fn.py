@@ -146,16 +146,17 @@ def run_fn(fn_args: tfx.components.FnArgs):
 
     model.save(fn_args.serving_model_dir, signatures=signatures)
 
+    # TODO: This part is still under development
     # Report parameters and metrics
-    experiment_name = fn_args.custom_config['experiment_name']
-    run_name = fn_args.custom_config['experiment_run_name']
-    project_id = fn_args.custom_config['project_id']
-    location = fn_args.custom_config['location']
-    accuracy = h.history['val_binary_accuracy'][-1]
-    _report_params_and_metrics(num_neurons=hparams.get("num_neurons"),
-                               batch_size=batch_size,
-                               accuracy=accuracy,
-                               experiment_name=experiment_name,
-                               run_name=run_name,
-                               project_id=project_id,
-                               location=location)
+    # experiment_name = fn_args.custom_config['experiment_name']
+    # run_name = fn_args.custom_config['experiment_run_name']
+    # project_id = fn_args.custom_config['project_id']
+    # location = fn_args.custom_config['location']
+    # accuracy = h.history['val_binary_accuracy'][-1]
+    # _report_params_and_metrics(num_neurons=hparams.get("num_neurons"),
+    #                            batch_size=batch_size,
+    #                            accuracy=accuracy,
+    #                            experiment_name=experiment_name,
+    #                            run_name=run_name,
+    #                            project_id=project_id,
+    #                            location=location)
