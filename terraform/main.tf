@@ -42,10 +42,15 @@ module "bigquery-dataset" {
 
 // Service accounts
 module "vertex_sa" {
-  source            = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v19.0.0"
-  project_id        = module.vx_pl_proj.project_id
-  name              = "ml-in-prod-vertex-sa"
-  generate_key      = false
+  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v19.0.0"
+  project_id   = module.vx_pl_proj.project_id
+  name         = "ml-in-prod-vertex-sa"
+  generate_key = false
+  iam          = {
+    "roles/iam.serviceAccountTokenCreator" = [
+      "serviceAccount:service-${module.vx_pl_proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+    ]
+  }
   iam_project_roles = {
     (module.vx_pl_proj.project_id) = [
       "roles/storage.admin",
