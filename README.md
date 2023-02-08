@@ -19,16 +19,6 @@ You only need to run the Terraform code once.
 
 ## Running the pipeline
 
-Edit the scripts in the directory `scripts` to point to your project id and region 
-of choice.
-
-To run the pipeline in Google Cloud, you need to run the provided scripts from the 
-top level directory of the repository:
-
-```shell
-./scripts/launch_google_cloud.sh
-```
-
 ### Python version
 
 Please don't use Python < 3.7 (e.g. 3.6) or Python > 3.9 (e.g. 3.10), they will 
@@ -62,4 +52,17 @@ And install the dependencies in the file `requirements.txt`, by running:
 pip install -r requirements.txt
 ```
 
+### Run the pipeline
 
+Edit the scripts in the directory `scripts` to point to your project id and region 
+of choice.
+
+The `playground` branch of this repository contains incomplete code that you need to
+finish, as an exercise to learn the ropes of TFX pipelines.
+
+To run the pipeline in Google Cloud, you need to run the provided scripts from the 
+top level directory of the repository:
+
+```shell
+./scripts/launch_google_cloud.sh
+```
