@@ -2,7 +2,15 @@
 
 Use this code to create a project in Google Cloud to run the Vertex pipeline.
 
-Configure the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk) 
+## Using the Cloud Shell 
+
+We recommend using the Cloud Shell with this code (e.g. clone the repo from 
+Github in the Cloud Shell), as everything will be already configured 
+(Terraform, Google Cloud SDK, etc).
+
+## Not using the Cloud Shell
+
+Alternatively, you can configure the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk) 
 with an account that can create projects (or the owner of an existing 
 project), and run this to authenticate for Terraform:
 
@@ -39,17 +47,30 @@ and then
 terraform apply
 ```
 
-## Import data
+## Summary of changes done to the project
+
+The Terraform uses the modules of [Cloud Foundations Fabric (FAST)](https://github.com/GoogleCloudPlatform/cloud-foundation-fabric), 
+and the setup is done following the principle of least privilege and applying 
+the recommendations given in the [Google Cloud Security Foundations blueprint](https://cloud.google.com/architecture/security-foundations)
+
+The following resources are created with this Terraform code:
+
+* A bucket of the same name as the project id, and the data in the subdirectory `data` uploaded to that bucket.
+* A dataset in BigQuery with name `data_playground`, with a table of name `transactions` containing the data for the demo.
+* Two custom service accounts: one for Vertex AI and one for Dataflow, with the right permissions to be used for those services.
+* The custom Vertex AI service account has permissions to use and impersonate the custom Dataflow service account.
+* The Vertex AI service agent account (created when you enable the Vertex API) has permissions to impersonate the custom Vertex AI service account.
+* A subnetwork in the selected region, with [Google Private Access enabled](https://cloud.google.com/vpc/docs/configure-private-google-access).
+* Some firewall rules preventing any machine in any other VPC or in Internet to reach the resources in your project
+* A Cloud NAT to channel the output to Internet, should that be required by any project resource
+
+## Data location
 
 The directory `data/` contains a CSV file that you need to import as table 
 in BigQuery in the dataset `data_playground`.
 
-The Terraform code creates a bucket with the same name as your project id. 
+The Terraform code creates a bucket with the same name as your project id 
+and uploads the CSV file to that bucket. 
 
-[Upload the CSV to that bucket](https://cloud.google.com/storage/docs/uploading-objects) 
-and [import it in BigQuery](https://cloud.google.com/bigquery/docs/loading-data-cloud-storage-csv). 
-
-Import it into a table of name `transactions`.
-
-You can use the automatic detection of schema and import the gzipped file 
-without having to uncompress it. 
+After that, the CSV file is automatically imported into a table of name 
+`transactions` in the dataset `data_playground`.
