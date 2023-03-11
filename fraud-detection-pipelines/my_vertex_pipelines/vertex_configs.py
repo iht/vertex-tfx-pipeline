@@ -63,7 +63,7 @@ def get_vertex_training_config(project_id: str,
                                'replica_count': 1,
                                'container_spec': {'image_uri': 'gcr.io/tfx-oss-public/tfx:{}'.format(tfx.__version__)}
                                }]
-    
+    }
 
     return vertex_job_spec
 
