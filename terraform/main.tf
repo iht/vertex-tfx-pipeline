@@ -47,9 +47,7 @@ module "vertex_sa" {
   name         = "ml-in-prod-vertex-sa"
   generate_key = false
   iam          = {
-    "roles/iam.serviceAccountTokenCreator" = [
-      "serviceAccount:service-${module.vx_pl_proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
-    ]
+    "roles/iam.serviceAccountUser" = [module.vertex_sa.iam_email]
   }
   iam_project_roles = {
     (module.vx_pl_proj.project_id) = [
