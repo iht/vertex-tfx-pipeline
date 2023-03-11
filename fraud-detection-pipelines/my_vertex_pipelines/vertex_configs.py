@@ -58,7 +58,7 @@ def get_vertex_training_config(project_id: str,
                                service_account: str) -> Dict[str, str]:
     vertex_job_spec = {
         'project': project_id,
-        # 'service_account': service_account, TODO: Service account is not used with the current setup
+        'service_account': service_account,
         'worker_pool_specs': [{'machine_spec': {'machine_type': 'e2-standard-4'},
                                'replica_count': 1,
                                'container_spec': {'image_uri': 'gcr.io/tfx-oss-public/tfx:{}'.format(tfx.__version__)}
