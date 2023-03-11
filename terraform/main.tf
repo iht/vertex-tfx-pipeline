@@ -1,6 +1,6 @@
 // Project
 module "vx_pl_proj" {
-  source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v19.0.0"
+  source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v20.0.0"
   billing_account = var.billing_account
   parent          = var.organization_or_folder
   name            = var.project_id
@@ -16,7 +16,7 @@ module "vx_pl_proj" {
 
 // Bucket for staging data, scripts, etc
 module "vx_pl_bucket" {
-  source        = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/gcs?ref=v19.0.0"
+  source        = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/gcs?ref=v20.0.0"
   project_id    = module.vx_pl_proj.project_id
   name          = module.vx_pl_proj.project_id
   location      = var.region
@@ -26,7 +26,7 @@ module "vx_pl_bucket" {
 
 // BigQuery dataset
 module "bigquery-dataset" {
-  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/bigquery-dataset?ref=v19.0.0"
+  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/bigquery-dataset?ref=v20.0.0"
   project_id = module.vx_pl_proj.project_id
   id         = "data_playground"
   location   = var.region // for easy import of data from public datasets
@@ -42,7 +42,7 @@ module "bigquery-dataset" {
 
 // Service accounts
 module "vertex_sa" {
-  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v19.0.0"
+  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v20.0.0"
   project_id   = module.vx_pl_proj.project_id
   name         = "ml-in-prod-vertex-sa"
   generate_key = false
@@ -63,7 +63,7 @@ module "vertex_sa" {
 }
 
 module "dataflow_sa" {
-  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v19.0.0"
+  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v20.0.0"
   project_id   = module.vx_pl_proj.project_id
   name         = "ml-in-prod-dataflow-sa"
   generate_key = false
@@ -82,7 +82,7 @@ module "dataflow_sa" {
 
 // Network
 module "vx_pl_vpc" {
-  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc?ref=v19.0.0"
+  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc?ref=v20.0.0"
   project_id = module.vx_pl_proj.project_id
   name       = "vertexnet"
 
@@ -98,7 +98,7 @@ module "vx_pl_vpc" {
 
 module "vx_pl_firewall" {
   // Default rules for internal traffic + SSH access via IAP
-  source               = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc-firewall?ref=v19.0.0"
+  source               = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc-firewall?ref=v20.0.0"
   project_id           = module.vx_pl_proj.project_id
   network              = module.vx_pl_vpc.name
   default_rules_config = {
@@ -108,7 +108,7 @@ module "vx_pl_firewall" {
 
 module "vx_pl_nat" {
   // So we can get to Internet if necessary
-  source         = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-cloudnat?ref=v19.0.0"
+  source         = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-cloudnat?ref=v20.0.0"
   project_id     = module.vx_pl_proj.project_id
   region         = var.region
   name           = "default"
