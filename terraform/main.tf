@@ -1,12 +1,13 @@
 locals {
-  services_used = [
+  services_restricted = [
     "bigquery.googleapis.com",
     "aiplatform.googleapis.com",
     "dataflow.googleapis.com",
-    "monitoring.googleapis.com"
+    "monitoring.googleapis.com",
+    "storage.googleapis.com"
   ]
 
-  apis_to_enable = concat(["accesscontextmanager.googleapis.com"], local.services_used)
+  apis_to_enable = concat(["accesscontextmanager.googleapis.com"], local.services_restricted)
 }
 
 // Project
@@ -127,12 +128,12 @@ module "vx_pl_vpc_sc" {
       status = {
         access_levels           = ["permitted_users"]
         resources               = ["projects/${module.vx_pl_proj.number}"]
-        restricted_services     = local.services_used
+        restricted_services     = local.services_restricted
         egress_policies         = []
         ingress_policies        = []
         vpc_accessible_services = {
-          allowed_services   = ["RESTRICTED-SERVICES"]
-          enable_restriction = true
+          allowed_services   = []
+          enable_restriction = false
         }
       }
     }
