@@ -1,2 +1,7 @@
-region          = "us-central1"
-project_id      = "my-project"
+region                   = "us-central1"
+project_id               = "my-project"
+organization             = "organizations/1234567890"
+create_bq_table          = true
+users_with_vpc_sc_access = [
+  "user:some_user@somewhere.com", "serviceAccount:some_sa@somewhere.com"
+]

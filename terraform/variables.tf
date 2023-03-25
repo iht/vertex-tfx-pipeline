@@ -10,10 +10,14 @@ variable "create_project" {
   default     = false
 }
 
-variable "organization_or_folder" {
-  description = "Parent for the project. Set this if create_project is true"
+variable "create_bq_table" {
+  description = "Whether to create the BQ table. Set to false if already created and running this TF code again."
+  type        = bool
+}
+
+variable "organization" {
+  description = "Parent for VPC SC access policy"
   type        = string
-  default     = null
 }
 
 variable "project_id" {
@@ -26,4 +30,7 @@ variable "region" {
   type        = string
 }
 
-
+variable "users_with_vpc_sc_access" {
+  description = "List of users with access to VPC SC, with IAM-style addresses"
+  type        = list(string)
+}

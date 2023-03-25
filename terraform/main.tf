@@ -1,17 +1,22 @@
+locals {
+  services_used = [
+    "bigquery.googleapis.com",
+    "aiplatform.googleapis.com",
+    "dataflow.googleapis.com",
+    "monitoring.googleapis.com"
+  ]
+
+  apis_to_enable = concat(["accesscontextmanager.googleapis.com"], local.services_used)
+}
+
 // Project
 module "vx_pl_proj" {
   source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v20.0.0"
   billing_account = var.billing_account
-  parent          = var.organization_or_folder
+  parent          = var.organization
   name            = var.project_id
   project_create  = var.create_project
-  services        = [
-    "bigquery.googleapis.com",
-    "aiplatform.googleapis.com",
-    "dataflow.googleapis.com",
-    "monitoring.googleapis.com",
-    "bigquerystorage.googleapis.com",
-  ]
+  services        = local.apis_to_enable
 }
 
 // Bucket for staging data, scripts, etc
@@ -104,29 +109,52 @@ module "vx_pl_firewall" {
   }
 }
 
-module "vx_pl_nat" {
-  // So we can get to Internet if necessary
-  source         = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-cloudnat?ref=v20.0.0"
-  project_id     = module.vx_pl_proj.project_id
-  region         = var.region
-  name           = "default"
-  router_network = module.vx_pl_vpc.self_link
+module "vx_pl_vpc_sc" {
+  source               = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/vpc-sc?ref=v20.0.0"
+  access_policy        = null
+  access_policy_create = {
+    parent = var.organization
+    title  = "vertex-pipelines-access-policy"
+  }
+  access_levels = {
+    permitted_users = {
+      conditions = [{ members = var.users_with_vpc_sc_access }]
+    }
+  }
+
+  service_perimeters_regular = {
+    vertex_pipeline_perimeter = {
+      status = {
+        access_levels           = ["permitted_users"]
+        resources               = ["projects/${module.vx_pl_proj.number}"]
+        restricted_services     = local.services_used
+        egress_policies         = []
+        ingress_policies        = []
+        vpc_accessible_services = {
+          allowed_services   = ["RESTRICTED-SERVICES"]
+          enable_restriction = true
+        }
+      }
+    }
+  }
 }
 
 resource "google_storage_bucket_object" "data_file" {
+  count  = var.create_bq_table == true ? 1 : 0
   bucket = module.vx_pl_bucket.name
   name   = "data/creditcard.csv.gz"
   source = "../data/creditcard.csv.gz"
 }
 
 resource "google_bigquery_job" "csv_load_job" {
-  depends_on = [google_storage_bucket_object.data_file]
+  count      = var.create_bq_table == true ? 1 : 0
+  depends_on = [google_storage_bucket_object.data_file[0]]
   job_id     = "load_csv_data"
   project    = module.vx_pl_proj.project_id
   location   = var.region
   load {
     source_uris = [
-      "gs://${google_storage_bucket_object.data_file.bucket}/${google_storage_bucket_object.data_file.output_name}"
+      "gs://${google_storage_bucket_object.data_file[0].bucket}/${google_storage_bucket_object.data_file[0].output_name}"
     ]
     destination_table {
       project_id = module.vx_pl_proj.project_id
