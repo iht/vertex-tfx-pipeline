@@ -17,6 +17,12 @@ Vertex AI and all the required APIs and permissions in the Google Cloud project.
 Please check the README.md in the [terraform/](terraform/) directory for more details. 
 You only need to run the Terraform code once.
 
+### Prepare the data
+PROJECT_ID=<PROJECT_ID>
+gcloud storage cp data/creditcard.csv.gz gs://$PROJECT_ID/data/
+
+bq load --project_id $PROJECT_ID --autodetect --source_format=CSV --replace=true data_playground.transactions gs://$PROJECT_ID/data/creditcard.csv.gz
+
 ## Running the pipeline
 
 ### Python version

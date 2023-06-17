@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-PROJECT=<YOUR PROJECT ID>
-REGION=us-central1
+PREFIX=YOUR_PREFIX
+PROJECT=$PREFIX-orbit1
+REGION=europe-west4
 QUERY="SELECT * FROM data_playground.transactions"
 
 PIPELINE_ROOT=gs://$PROJECT/pipeline
@@ -25,9 +25,10 @@ TRAINER_FN=./my_vertex_pipelines/trainer_fn.py
 
 TEMP_LOCATION=gs://$PROJECT/tmp/
 
-SERVICE_ACCOUNT=ml-in-prod-vertex-sa@$PROJECT.iam.gserviceaccount.com
-SERVICE_ACCOUNT_DATAFLOW=ml-in-prod-dataflow-sa@$PROJECT.iam.gserviceaccount.com
-SUBNETWORK=regions/$REGION/subnetworks/vertex
+
+SERVICE_ACCOUNT=$PREFIX-sa-mlops@$PROJECT.iam.gserviceaccount.com
+SERVICE_ACCOUNT_DATAFLOW=$PREFIX-sa-mlops@$PROJECT.iam.gserviceaccount.com
+SUBNETWORK=regions/$REGION/subnetworks/default
 
 cd fraud-detection-pipelines || exit
 
