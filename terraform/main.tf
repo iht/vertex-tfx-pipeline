@@ -1,140 +1,15 @@
-// Project
-module "vx_pl_proj" {
-  source          = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/project?ref=v20.0.0"
-  billing_account = var.billing_account
-  parent          = var.organization_or_folder
-  name            = var.project_id
-  project_create  = var.create_project
-  services        = [
-    "bigquery.googleapis.com",
-    "aiplatform.googleapis.com",
-    "dataflow.googleapis.com",
-    "monitoring.googleapis.com",
-    "bigquerystorage.googleapis.com",
-  ]
-}
+module "mlops" {
+  source = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//blueprints/data-solutions/vertex-mlops"
 
-// Bucket for staging data, scripts, etc
-module "vx_pl_bucket" {
-  source        = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/gcs?ref=v20.0.0"
-  project_id    = module.vx_pl_proj.project_id
-  name          = module.vx_pl_proj.project_id
-  location      = var.region
-  storage_class = "STANDARD"
-  force_destroy = true
-}
-
-// BigQuery dataset
-module "bigquery-dataset" {
-  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/bigquery-dataset?ref=v20.0.0"
-  project_id = module.vx_pl_proj.project_id
-  id         = "data_playground"
-  location   = var.region // for easy import of data from public datasets
-  access     = {
-    vertex_sa   = { role = "READER", type = "user" },
-    dataflow_sa = { role = "READER", type = "user" }
-  }
-  access_identities = {
-    vertex_sa   = module.vertex_sa.email,
-    dataflow_sa = module.dataflow_sa.email,
-  }
-}
-
-// Service accounts
-module "vertex_sa" {
-  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v20.0.0"
-  project_id   = module.vx_pl_proj.project_id
-  name         = "ml-in-prod-vertex-sa"
-  generate_key = false
-  iam          = {
-    "roles/iam.serviceAccountUser" = [module.vertex_sa.iam_email]
-  }
-  iam_project_roles = {
-    (module.vx_pl_proj.project_id) = [
-      "roles/storage.admin",
-      "roles/aiplatform.user",
-      "roles/bigquery.user",
-      "roles/dataflow.admin",
-      "roles/monitoring.metricWriter",
-    ]
-  }
-}
-
-module "dataflow_sa" {
-  source       = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/iam-service-account?ref=v20.0.0"
-  project_id   = module.vx_pl_proj.project_id
-  name         = "ml-in-prod-dataflow-sa"
-  generate_key = false
-  iam          = {
-    "roles/iam.serviceAccountUser" = [module.vertex_sa.iam_email]
-  }
-  iam_project_roles = {
-    (module.vx_pl_proj.project_id) = [
-      "roles/storage.admin",
-      "roles/dataflow.worker",
-      "roles/monitoring.metricWriter",
-      "roles/bigquery.user"
-    ]
-  }
-}
-
-// Network
-module "vx_pl_vpc" {
-  source     = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc?ref=v20.0.0"
-  project_id = module.vx_pl_proj.project_id
-  name       = "vertexnet"
-
-  subnets = [
-    {
-      ip_cidr_range         = "10.1.0.0/24"
-      name                  = "vertex"
-      region                = var.region
-      enable_private_access = true
-    }
-  ]
-}
-
-module "vx_pl_firewall" {
-  // Default rules for internal traffic + SSH access via IAP
-  source               = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-vpc-firewall?ref=v20.0.0"
-  project_id           = module.vx_pl_proj.project_id
-  network              = module.vx_pl_vpc.name
-  default_rules_config = {
-    admin_ranges = [module.vx_pl_vpc.subnet_ips["${var.region}/vertex"]]
-  }
-}
-
-module "vx_pl_nat" {
-  // So we can get to Internet if necessary
-  source         = "github.com/GoogleCloudPlatform/cloud-foundation-fabric//modules/net-cloudnat?ref=v20.0.0"
-  project_id     = module.vx_pl_proj.project_id
-  region         = var.region
-  name           = "default"
-  router_network = module.vx_pl_vpc.self_link
-}
-
-resource "google_storage_bucket_object" "data_file" {
-  bucket = module.vx_pl_bucket.name
-  name   = "data/creditcard.csv.gz"
-  source = "../data/creditcard.csv.gz"
-}
-
-resource "google_bigquery_job" "csv_load_job" {
-  depends_on = [google_storage_bucket_object.data_file]
-  job_id     = "load_csv_data"
-  project    = module.vx_pl_proj.project_id
-  location   = var.region
-  load {
-    source_uris = [
-      "gs://${google_storage_bucket_object.data_file.bucket}/${google_storage_bucket_object.data_file.output_name}"
-    ]
-    destination_table {
-      project_id = module.vx_pl_proj.project_id
-      dataset_id = module.bigquery-dataset.dataset_id
-      table_id   = "transactions"
-    }
-    autodetect        = true
-    source_format     = "CSV"
-    write_disposition = "WRITE_TRUNCATE"
+  #IMPORTANT: Choose an unique prefix
+  prefix       = "YOUR_PREFIX"
+  bucket_name  = "orbit1"
+  dataset_name = "data_playground"
+  notebooks    = {}
+  #Provide 'billing_account_id' value if project creation is needed, uses existing 'project_id' if null
+  project_config = {
+    #billing_account_id = "000000-123456-123456"
+    #parent             = "folders/111111111111"
+    project_id = "orbit1"
   }
 }
