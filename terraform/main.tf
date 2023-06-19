@@ -6,6 +6,8 @@ module "vx_pl_proj" {
   name            = var.project_id
   project_create  = var.create_project
   services        = [
+    "cloudresourcemanager.googleapis.com",
+    "iam.googleapis.com",
     "bigquery.googleapis.com",
     "aiplatform.googleapis.com",
     "dataflow.googleapis.com",
