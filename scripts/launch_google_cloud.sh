@@ -28,7 +28,7 @@ TEMP_LOCATION=gs://$PROJECT/tmp/
 
 SERVICE_ACCOUNT=$PREFIX-sa-mlops@$PROJECT.iam.gserviceaccount.com
 SERVICE_ACCOUNT_DATAFLOW=$PREFIX-sa-mlops@$PROJECT.iam.gserviceaccount.com
-SUBNETWORK=regions/$REGION/subnetworks/default
+SUBNETWORK=regions/$REGION/subnetworks/subnet-$REGION
 
 cd fraud-detection-pipelines || exit
 
